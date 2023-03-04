@@ -41,6 +41,19 @@ app.use(express.urlencoded({extended:true}));
 // auth router attaches /login, /logout, and /callback routes to the baseURL
 app.use(auth(config));
 
+// this middleware will save user info to the database
+app.use(async (req, res, next) => {
+  const [user] = await User.findOrCreate({
+    where: {
+      username: req.oidc.user.nickname,
+      name: req.oidc.user.name,
+      email: req.oidc.user.email,
+    }
+  });
+  console.log('USER: ', user);
+  next()
+});
+
 // req.isAuthenticated is provided from the auth router
 app.get('/', (req, res) => {
   console.log(req.oidc.user)
